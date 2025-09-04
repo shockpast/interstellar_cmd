@@ -1,3 +1,9 @@
+# interstellar_cmd
+
+uses [SendMessage](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessage) from user32 to remotely execute commands inside Garry's Mod process.
+
+![preview](.github/preview.png)
+
 ## requirements
 
 - [interstellar_console](https://github.com/eprosync/interstellar_console)
