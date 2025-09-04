@@ -12,3 +12,7 @@
 - `interstellar.exe -memory -f main.lua echo hello, world!`
 - `interstellar.exe -memory -f main.lua quit`
 - `interstellar.exe -memory -f main.lua say interstellar_cmd`
+
+## todo
+
+- [ ] -multirun support
