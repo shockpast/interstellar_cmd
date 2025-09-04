@@ -1,0 +1,6 @@
+{
+    "Lua.workspace.library": [
+        ".vscode/interstellar.lua"
+    ],
+    "Lua.workspace.checkThirdParty": false
+}

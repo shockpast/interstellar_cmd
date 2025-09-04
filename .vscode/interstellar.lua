@@ -1,0 +1,416 @@
+---@class memory.address
+---@field raw number
+---@field int8 number
+---@field uint8 number
+---@field int16 number
+---@field uint16 number
+---@field int32 number
+---@field uint32 number
+---@field int64 number
+---@field uint64 number
+---@field bool boolean
+---@field char number
+---@field uchar number
+---@field short number
+---@field ushort number
+---@field int number
+---@field uint number
+---@field long number
+---@field ulong number
+---@field float number
+---@field double number
+
+---@class memory.module
+---@field name string
+---@field base memory.address
+---@field size number
+
+---@class memory.region
+---@field base memory.address
+---@field size number
+---@field state "commit" | "reserve" | "free"
+---@field type "none" | "image" | "mapped" | "private"
+---@field protect string[]
+
+---@class memory.size
+---@field int8 number
+---@field uint8 number
+---@field int16 number
+---@field uint16 number
+---@field int32 number
+---@field uint32 number
+---@field int64 number
+---@field uint64 number
+---@field bool number
+---@field char number
+---@field uchar number
+---@field short number
+---@field ushort number
+---@field int number
+---@field uint number
+---@field long number
+---@field ulong number
+---@field float number
+---@field double number
+
+---@class memory
+---
+---Creates a new address class.<br><br>
+---Using a string will attempt for format a hex-string to address.<br>
+---Using cfunctions or userdata retrives their absolute location in memory.
+---@field address fun(value: number | string | function | userdata): memory.address
+---Allocates a fixed size of memory in heap.
+---@field allocate fun(size: number): memory.address
+---Attempts to retreive a loaded module.<br>
+---Windows are usually named .dll, while linux are .so
+---@field module fun(name?: string): memory.module
+---Lists all modules that has been loaded.<br>
+---Windows are usually named .dll, while linux are .so
+---@field modules fun(): memory.module[]
+---Lists all regions that is associated with the current process.<br>
+---This basically gives you all of the virtual memory allocated to this process.
+---@field regions fun(): memory.region[] 
+---Finds the region that a memory address is located in.
+---@field region fun(loc: memory.address): memory.region?
+---Attempts to locate the base module based on the address.<br>
+---This only works if the address with within the address-space of a module.
+---@field base fun(addr: memory.address): memory.module?
+---Attempts to search for existing routines or variables that are disclosed.
+---@field fetch fun(module: memory.module, name: string): memory.address
+---Attempt to search for various interface routines & calls them.
+---@field interface fun(module: memory.module, name: string): memory.address?
+---Performs a simple indexing on an address.<br>
+---This equates to simply ((void**)input)[index]
+---@field index fun(input: memory.address, index: number): memory.address?
+---Performs a simple offset to an address<br>
+---This equates to simply (void*)input + offset
+---@field offset fun(input: memory.address, offset: number): memory.address
+---Performs a relative instruction operation.<br>
+---For windows-x64-intel this peaks into a subroutine using "call" opcode -> memory.relative(addr, 0x1, 0x5)
+---@field relative fun(input: memory.address, offset: number, size: number): memory.address?
+---Performs a de-reference to a class for it's vtable.<br>
+---This equates to simply *reinterpret_cast<void***>(address)
+---@field vtable fun(input: memory.address): memory.address?
+---@field aob memory.aob
+---@field read memory.read
+---@field write memory.write
+---@field scan memory.scan
+---@field subroutine memory.subroutine
+---@field jump memory.jump
+---@field call memory.call
+---@field trampoline memory.trampoline
+
+---@class memory.aob
+---Performs a hex-style signature scan on a module.<br>
+---Example: \xA0?\xB1
+---@field hex fun(module: memory.module, pattern: string): memory.address?
+---Performs a ida-style signature scan on a module.<br>
+---Example: A0 ? B1
+---@field ida fun(module: memory.module, pattern: string): memory.address?
+
+---@class memory.read
+---Attempts to read a int8 value.<br>
+---Size: 1 Byte - 8 Bits
+---@field int8 fun(input: memory.address): number?
+---Attempts to read a uint8 value.<br>
+---Size: 1 Byte - 8 Bits
+---@field uint8 fun(input: memory.address): number?
+---Attempts to read a int16 value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field int16 fun(input: memory.address): number?
+---Attempts to read a uint16 value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field uint16 fun(input: memory.address): number?
+---Attempts to read a int32 value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field int32 fun(input: memory.address): number?
+---Attempts to read a uint32 value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field uint32 fun(input: memory.address): number?
+---Attempts to read a int64 value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field int64 fun(input: memory.address): number?
+---Attempts to read a uint64 value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field uint64 fun(input: memory.address): number?
+---Attempts to read a boolean value.<br>
+---Typically the size of a boolean is defined as 1 bit.<br>
+---However some systems differ claiming 1 byte or 8 bits.
+---@field bool fun(input: memory.address): boolean?
+---Attempts to read a char value.<br>
+---Size: 1 Byte - 8 Bits
+---@field char fun(input: memory.address): number?
+---Attempts to read a unsigned char value.<br>
+---Size: 1 Byte - 8 Bits
+---@field uchar fun(input: memory.address): number?
+---Attempts to read a short value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field short fun(input: memory.address): number?
+---Attempts to read a unsigned short value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field ushort fun(input: memory.address): number?
+---Attempts to read a int value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field int fun(input: memory.address): number?
+---Attempts to read a unsigned int value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field uint fun(input: memory.address): number?
+---Attempts to read a long value.<br>
+---Size: 4 Bytes - 32 Bits (Win) | 8 Bytes - 64 Bits (Linux)
+---@field long fun(input: memory.address): number?
+---Attempts to read a unsigned long value.<br>
+---Size: 4 Bytes - 32 Bits (Win) | 8 Bytes - 64 Bits (Linux)
+---@field ulong fun(input: memory.address): number?
+---Attempts to read a float value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field float fun(input: memory.address): number?
+---Attempts to read a double value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field double fun(input: memory.address): number?
+---Attempts to read a sequence of bytes.<br>
+---Example returns: A1 B2 C3
+---@field sequence fun(input: memory.address, size: number): string
+---Attempts to read a void* value.
+---@field address fun(input: memory.address): memory.address?
+
+---@class memory.write
+---Attempts to write a int8 value.<br>
+---Size: 1 Bytes - 8 Bits
+---@field int8 fun(input: memory.address, value: number)
+---Attempts to write a uint8 value.<br>
+---Size: 1 Byte - 8 Bits
+---@field uint8 fun(input: memory.address, value: number)
+---Attempts to write a int16 value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field int16 fun(input: memory.address, value: number)
+---Attempts to write a uint16 value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field uint16 fun(input: memory.address, value: number)
+---Attempts to write a int32 value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field int32 fun(input: memory.address, value: number)
+---Attempts to write a uint32 value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field uint32 fun(input: memory.address, value: number)
+---Attempts to write a int64 value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field int64 fun(input: memory.address, value: number)
+---Attempts to write a uint64 value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field uint64 fun(input: memory.address, value: number)
+---Attempts to write a boolean value.<br>
+---Typically the size of a boolean is defined as 1 bit.<br>
+---However some systems differ claiming 1 byte or 8 bits.
+---@field bool fun(input: memory.address, value: boolean)
+---Attempts to write a char value.<br>
+---Size: 1 Byte - 8 Bits
+---@field char fun(input: memory.address, value: number)
+---Attempts to write a unsigned char value.<br>
+---Size: 1 Byte - 8 Bits
+---@field uchar fun(input: memory.address, value: number)
+---Attempts to write a short value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field short fun(input: memory.address, value: number)
+---Attempts to write a unsigned short value.<br>
+---Size: 2 Bytes - 16 Bits
+---@field ushort fun(input: memory.address, value: number)
+---Attempts to write a int value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field int fun(input: memory.address, value: number)
+---Attempts to write a unsigned int value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field uint fun(input: memory.address, value: number)
+---Attempts to write a long value.<br>
+---Size: 4 Bytes - 32 Bits (Win) | 8 Bytes - 64 Bits (Linux)
+---@field long fun(input: memory.address, value: number)
+---Attempts to write a unsigned long value.<br>
+---Size: 4 Bytes - 32 Bits (Win) | 8 Bytes - 64 Bits (Linux)
+---@field ulong fun(input: memory.address, value: number)
+---Attempts to write a float value.<br>
+---Size: 4 Bytes - 32 Bits
+---@field float fun(input: memory.address, value: number)
+---Attempts to write a double value.<br>
+---Size: 8 Bytes - 64 Bits
+---@field double fun(input: memory.address, value: number)
+---Attempts to write a sequence of bytes to the address.<br>
+---Example sequences that are valid: A1 B2 C3 or A1B2C3
+---@field sequence fun(input: memory.address, value: string, size: number)
+---Attempts to write a address value.
+---@field address fun(input: memory.address, value: memory.address)
+---Attempts to write a string value to the address.<br>
+---This will write a null-terminated string.<br>
+---This is the equivilant of writing a char array with a null terminator.
+---@field string fun(input: memory.address, value: string)
+
+---@class memory.scan
+---Attempts to scan for a certain int8 value.
+---@field int8 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain uint8 value.
+---@field uint8 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain int16 value.
+---@field int16 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain uint16 value.
+---@field uint16 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain int32 value.
+---@field int32 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain uint32 value.
+---@field uint32 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain int64 value.
+---@field int64 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain uint64 value.
+---@field uint64 fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain boolean value.
+---@field bool fun(input: boolean, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain char value.
+---@field char fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain unsigned char value.
+---@field uchar fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain short value.
+---@field short fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain unsigned short value.
+---@field ushort fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain int value.
+---@field int fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain unsigned int value.
+---@field uint fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain long value.
+---@field long fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain unsigned long value.
+---@field ulong fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain float value.
+---@field float fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain double value.
+---@field double fun(input: number, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+---Attempts to scan for a certain void* value.
+---@field address fun(input: memory.address, start?: memory.module | memory.region | memory.address, end?: memory.address): memory.address[]
+
+---@class memory.subroutine
+---Creates a blank subroutine that does nothing.<br>
+---This is created in heap, therefore it will increase memory.
+---@field blank fun(): memory.address
+---Creates a blank subroutine which only returns an 8-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field int8 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an unsigned 8-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uint8 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an 16-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field int16 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an unsigned 16-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uint16 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an 32-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field int32 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an unsigned 32-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uint32 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an 64-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field int64 fun(value: number): memory.address
+---Creates a blank subroutine which only returns an unsigned 64-bit integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uint64 fun(value: number): memory.address
+---Creates a blank subroutine which only returns a boolean.<br>
+---This is created in heap, therefore it will increase memory.
+---@field bool fun(value: boolean): memory.address
+---Creates a blank subroutine which only returns a character.<br>
+---This is created in heap, therefore it will increase memory.
+---@field char fun(value: number): memory.address
+---Creates a blank subroutine which only returns a unsigned character.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uchar fun(value: number): memory.address
+---Creates a blank subroutine which only returns a short.<br>
+---This is created in heap, therefore it will increase memory.
+---@field short fun(value: number): memory.address
+---Creates a blank subroutine which only returns a unsigned short.<br>
+---This is created in heap, therefore it will increase memory.
+---@field ushort fun(value: number): memory.address
+---Creates a blank subroutine which only returns a integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field int fun(value: number): memory.address
+---Creates a blank subroutine which only returns a unsigned integer.<br>
+---This is created in heap, therefore it will increase memory.
+---@field uint fun(value: number): memory.address
+---Creates a blank subroutine which only returns a long.<br>
+---This is created in heap, therefore it will increase memory.
+---@field long fun(value: number): memory.address
+---Creates a blank subroutine which only returns a unsigned long.<br>
+---This is created in heap, therefore it will increase memory.
+---@field ulong fun(value: number): memory.address
+---Creates a blank subroutine which only returns a float.<br>
+---This is created in heap, therefore it will increase memory.
+---@field float fun(value: number): memory.address
+---Creates a blank subroutine which only returns a double.<br>
+---This is created in heap, therefore it will increase memory.
+---@field double fun(value: number): memory.address
+---Creates a subroutine from a sequence.<br>
+---This is created in heap, therefore it will increase memory.
+---@field sequence fun(hex: string): memory.address
+---Creates a subroutine that invokes a lua callback.<br>
+---Do note this doesn't allow returns or parameters (yet).<br>
+---This is created in heap, therefore it will increase memory.
+---@field invoker fun(callback: function): memory.address
+---This calls a function at the specified address.<br>
+---Make sure to validate before invoking.<br>
+---This is the equivilant of calling functions in C.<br><br>
+---**Unstable**<br><br>
+---This will tell the processor to move into a routine.<br>
+---Make sure to validate your routines before calling emit.
+---@field emit fun(loc: memory.address, ...): memory.address
+
+---@class memory.jump
+---Creates an unconditional jump to an address in a specified location.<br>
+---If a function is passed it will use memory.subroutine.invoker.
+---@field hook fun(loc: memory.address, target: memory.address): boolean
+---Removes and restores a specified location from an unconditional jump.
+---@field unhook fun(loc: memory.address): boolean
+---Gives a list of memory addresses that have been hooked using jump.
+---@field list fun(): memory.address[]
+---Gets the memory address that the jump is targeting.
+---@field get fun(loc: memory.address): memory.address?
+
+---@class memory.call
+---Creates a call to an address in a specified location.<br>
+---If a function is passed it will use memory.subroutine.invoker.
+---@field hook fun(loc: memory.address, target: memory.address): boolean
+---Removes and restores a specified location from an unconditional call.
+---@field unhook fun(loc: memory.address): boolean
+---Gives a list of memory addresses that have been hooked using call.
+---@field list fun(): memory.address[]
+---Gets the memory address that the call is targeting.
+---@field get fun(loc: memory.address): memory.address?
+
+---@class memory.trampoline
+---Creates a trampoline to an address in a specified location.<br>
+---This will return a clone of a function's first few bytes (which then jumps into the main function right after).<br>
+---If a function is passed it will use memory.subroutine.invoker.
+---@field hook fun(loc: memory.address, target: memory.address): memory.address?
+---Removes and restores a specified location from an unconditional trampoline.
+---@field unhook fun(loc: memory.address): boolean
+---Gives a list of memory addresses that have been hooked using trampoline.
+---@field list fun(): memory.address[]
+---Gets the memory address that the trampoline is targeting.
+---@field get fun(loc: memory.address): memory.address?
+
+---@class os
+---@field argv os.argv
+
+---@class os.argv
+---Gets the raw commandline of the executable.
+---@field raw fun(): string
+---Gets flag-like arguments from the commandline.<br>
+---Flags are denoted as arguments with no values.<br>
+---Passing a string will check to see if it exists.
+---@field flags fun(flag?: string): string[] | boolean
+---Gets option-like arguments from the commandline.<br>
+---Options are denoted as arguments with values.<br>
+---Passing a string will check to see if it exists and return its value.
+---@field options fun(opt?: string): string[] | {[string]: string} | string
+---Gets positional-like arguments from the commandline.<br>
+---These are usually denote as having no "-", or "--" or "+" prefix, typically at the start.
+---@field positional fun(): string[]
+---Checks for both flag-like and option-like arguments.<br>
+---Useful if you just want to check if it "exists".
+---@field exists fun(opt: string): boolean, string?
